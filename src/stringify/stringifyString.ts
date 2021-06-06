@@ -264,10 +264,8 @@ function plainString(
       quotedString = singleQuotedString
     } else if (hasSingle && !hasDouble) {
       quotedString = doubleQuotedString
-    } else if (ctx.options.singleQuote) {
-      quotedString = singleQuotedString
     } else {
-      quotedString = doubleQuotedString
+      quotedString = singleQuotedString
     }
     // not allowed:
     // - empty string, '-' or '?'
