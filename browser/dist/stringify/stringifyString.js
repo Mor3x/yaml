@@ -137,7 +137,7 @@ function blockString({ comment, type, value }, ctx, onComment, onChompKeep) {
     // 1. Block can't end in whitespace unless the last line is non-empty.
     // 2. Strings consisting of only whitespace are best rendered explicitly.
     if (/\n[\t ]+$/.test(value) || /^\s*$/.test(value)) {
-        return doubleQuotedString(value, ctx);
+        return singleQuotedString(value, ctx);
     }
     const indent = ctx.indent ||
         (ctx.forceBlockIndent || containsDocumentMarker(value) ? '  ' : '');
@@ -218,7 +218,7 @@ function plainString(item, ctx, onComment, onChompKeep) {
     const { actualString, implicitKey, indent, inFlow } = ctx;
     if ((implicitKey && /[\n[\]{},]/.test(value)) ||
         (inFlow && /[[\]{},]/.test(value))) {
-        return doubleQuotedString(value, ctx);
+        return singleQuotedString(value, ctx);
     }
     if (!value ||
         /^[\n\t ,[\]{}#&*!|>'"%@`]|^[?-]$|^[?-][ \t]|[\n:][ \t]|[ \t]\n|[\n\t ]#|[\n\t :]$/.test(value)) {
