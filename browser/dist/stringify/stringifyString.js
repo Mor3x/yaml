@@ -264,7 +264,7 @@ function plainString(item, ctx, onComment, onChompKeep) {
             if (tag.default &&
                 tag.tag !== 'tag:yaml.org,2002:str' &&
                 ((_a = tag.test) === null || _a === void 0 ? void 0 : _a.test(str)))
-                return doubleQuotedString(value, ctx);
+                return singleQuotedString(value, ctx);
         }
     }
     return implicitKey
