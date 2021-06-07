@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * `yaml` defines document-specific options in three places: as an argument of
  * parse, create and stringify calls, in the values of `YAML.defaultOptions`,
@@ -16,4 +14,4 @@ const defaultOptions = {
     version: '1.2'
 };
 
-exports.defaultOptions = defaultOptions;
+export { defaultOptions };

@@ -1,18 +1,16 @@
-'use strict';
-
-var composer = require('./compose/composer.js');
-var Document = require('./doc/Document.js');
-var errors = require('./errors.js');
-var log = require('./log.js');
-var lineCounter = require('./parse/line-counter.js');
-var parser = require('./parse/parser.js');
+import { Composer } from './compose/composer.js';
+import { Document } from './doc/Document.js';
+import { prettifyError, YAMLParseError } from './errors.js';
+import { warn } from './log.js';
+import { LineCounter } from './parse/line-counter.js';
+import { Parser } from './parse/parser.js';
 
 function parseOptions(options) {
     const prettyErrors = !options || options.prettyErrors !== false;
-    const lineCounter$1 = (options && options.lineCounter) ||
-        (prettyErrors && new lineCounter.LineCounter()) ||
+    const lineCounter = (options && options.lineCounter) ||
+        (prettyErrors && new LineCounter()) ||
         null;
-    return { lineCounter: lineCounter$1, prettyErrors };
+    return { lineCounter, prettyErrors };
 }
 /**
  * Parse the input as a stream of YAML documents.
@@ -25,36 +23,36 @@ function parseOptions(options) {
  */
 function parseAllDocuments(source, options = {}) {
     const { lineCounter, prettyErrors } = parseOptions(options);
-    const parser$1 = new parser.Parser(lineCounter === null || lineCounter === void 0 ? void 0 : lineCounter.addNewLine);
-    const composer$1 = new composer.Composer(options);
-    const docs = Array.from(composer$1.compose(parser$1.parse(source)));
+    const parser = new Parser(lineCounter === null || lineCounter === void 0 ? void 0 : lineCounter.addNewLine);
+    const composer = new Composer(options);
+    const docs = Array.from(composer.compose(parser.parse(source)));
     if (prettyErrors && lineCounter)
         for (const doc of docs) {
-            doc.errors.forEach(errors.prettifyError(source, lineCounter));
-            doc.warnings.forEach(errors.prettifyError(source, lineCounter));
+            doc.errors.forEach(prettifyError(source, lineCounter));
+            doc.warnings.forEach(prettifyError(source, lineCounter));
         }
     if (docs.length > 0)
         return docs;
-    return Object.assign([], { empty: true }, composer$1.streamInfo());
+    return Object.assign([], { empty: true }, composer.streamInfo());
 }
 /** Parse an input string into a single YAML.Document */
 function parseDocument(source, options = {}) {
     const { lineCounter, prettyErrors } = parseOptions(options);
-    const parser$1 = new parser.Parser(lineCounter === null || lineCounter === void 0 ? void 0 : lineCounter.addNewLine);
-    const composer$1 = new composer.Composer(options);
+    const parser = new Parser(lineCounter === null || lineCounter === void 0 ? void 0 : lineCounter.addNewLine);
+    const composer = new Composer(options);
     // `doc` is always set by compose.end(true) at the very latest
     let doc = null;
-    for (const _doc of composer$1.compose(parser$1.parse(source), true, source.length)) {
+    for (const _doc of composer.compose(parser.parse(source), true, source.length)) {
         if (!doc)
             doc = _doc;
         else if (doc.options.logLevel !== 'silent') {
-            doc.errors.push(new errors.YAMLParseError(_doc.range.slice(0, 2), 'MULTIPLE_DOCS', 'Source contains multiple documents; please use YAML.parseAllDocuments()'));
+            doc.errors.push(new YAMLParseError(_doc.range.slice(0, 2), 'MULTIPLE_DOCS', 'Source contains multiple documents; please use YAML.parseAllDocuments()'));
             break;
         }
     }
     if (prettyErrors && lineCounter) {
-        doc.errors.forEach(errors.prettifyError(source, lineCounter));
-        doc.warnings.forEach(errors.prettifyError(source, lineCounter));
+        doc.errors.forEach(prettifyError(source, lineCounter));
+        doc.warnings.forEach(prettifyError(source, lineCounter));
     }
     return doc;
 }
@@ -69,7 +67,7 @@ function parse(src, reviver, options) {
     const doc = parseDocument(src, options);
     if (!doc)
         return null;
-    doc.warnings.forEach(warning => log.warn(doc.options.logLevel, warning));
+    doc.warnings.forEach(warning => warn(doc.options.logLevel, warning));
     if (doc.errors.length > 0) {
         if (doc.options.logLevel !== 'silent')
             throw doc.errors[0];
@@ -97,10 +95,7 @@ function stringify(value, replacer, options) {
         if (!keepUndefined)
             return undefined;
     }
-    return new Document.Document(value, _replacer, options).toString(options);
+    return new Document(value, _replacer, options).toString(options);
 }
 
-exports.parse = parse;
-exports.parseAllDocuments = parseAllDocuments;
-exports.parseDocument = parseDocument;
-exports.stringify = stringify;
+export { parse, parseAllDocuments, parseDocument, stringify };

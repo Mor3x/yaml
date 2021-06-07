@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Tracks newlines during parsing in order to provide an efficient API for
  * determining the one-indexed `{ line, col }` position for any offset
@@ -38,4 +36,4 @@ class LineCounter {
     }
 }
 
-exports.LineCounter = LineCounter;
+export { LineCounter };

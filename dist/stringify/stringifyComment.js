@@ -1,5 +1,3 @@
-'use strict';
-
 const stringifyComment = (comment, indent) => /^\n+$/.test(comment)
     ? comment.substring(1)
     : comment.replace(/^(?!$)(?: $)?/gm, `${indent}#`);
@@ -13,5 +11,4 @@ function addComment(str, indent, comment) {
                 : `${str} #${comment}`;
 }
 
-exports.addComment = addComment;
-exports.stringifyComment = stringifyComment;
+export { addComment, stringifyComment };

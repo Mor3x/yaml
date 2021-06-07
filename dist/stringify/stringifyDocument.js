@@ -1,8 +1,6 @@
-'use strict';
-
-var Node = require('../nodes/Node.js');
-var stringify = require('./stringify.js');
-var stringifyComment = require('./stringifyComment.js');
+import { isNode } from '../nodes/Node.js';
+import { createStringifyContext, stringify } from './stringify.js';
+import { stringifyComment, addComment } from './stringifyComment.js';
 
 function stringifyDocument(doc, options) {
     const lines = [];
@@ -21,25 +19,25 @@ function stringifyDocument(doc, options) {
     if (doc.commentBefore) {
         if (lines.length !== 1)
             lines.unshift('');
-        lines.unshift(stringifyComment.stringifyComment(doc.commentBefore, ''));
+        lines.unshift(stringifyComment(doc.commentBefore, ''));
     }
-    const ctx = stringify.createStringifyContext(doc, options);
+    const ctx = createStringifyContext(doc, options);
     let chompKeep = false;
     let contentComment = null;
     if (doc.contents) {
-        if (Node.isNode(doc.contents)) {
+        if (isNode(doc.contents)) {
             if (doc.contents.spaceBefore && hasDirectives)
                 lines.push('');
             if (doc.contents.commentBefore)
-                lines.push(stringifyComment.stringifyComment(doc.contents.commentBefore, ''));
+                lines.push(stringifyComment(doc.contents.commentBefore, ''));
             // top-level block scalars need to be indented if followed by a comment
             ctx.forceBlockIndent = !!doc.comment;
             contentComment = doc.contents.comment;
         }
         const onChompKeep = contentComment ? undefined : () => (chompKeep = true);
-        let body = stringify.stringify(doc.contents, ctx, () => (contentComment = null), onChompKeep);
+        let body = stringify(doc.contents, ctx, () => (contentComment = null), onChompKeep);
         if (contentComment)
-            body = stringifyComment.addComment(body, '', contentComment);
+            body = addComment(body, '', contentComment);
         if ((body[0] === '|' || body[0] === '>') &&
             lines[lines.length - 1] === '---') {
             // Top-level block scalars with a preceding doc marker ought to use the
@@ -50,7 +48,7 @@ function stringifyDocument(doc, options) {
             lines.push(body);
     }
     else {
-        lines.push(stringify.stringify(doc.contents, ctx));
+        lines.push(stringify(doc.contents, ctx));
     }
     let dc = doc.comment;
     if (dc && chompKeep)
@@ -58,9 +56,9 @@ function stringifyDocument(doc, options) {
     if (dc) {
         if ((!chompKeep || contentComment) && lines[lines.length - 1] !== '')
             lines.push('');
-        lines.push(stringifyComment.stringifyComment(dc, ''));
+        lines.push(stringifyComment(dc, ''));
     }
     return lines.join('\n') + '\n';
 }
 
-exports.stringifyDocument = stringifyDocument;
+export { stringifyDocument };

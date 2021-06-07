@@ -1,14 +1,12 @@
-'use strict';
+import { stringifyCollection } from '../stringify/stringifyCollection.js';
+import { Collection } from './Collection.js';
+import { SEQ, isScalar } from './Node.js';
+import { isScalarValue } from './Scalar.js';
+import { toJS } from './toJS.js';
 
-var stringifyCollection = require('../stringify/stringifyCollection.js');
-var Collection = require('./Collection.js');
-var Node = require('./Node.js');
-var Scalar = require('./Scalar.js');
-var toJS = require('./toJS.js');
-
-class YAMLSeq extends Collection.Collection {
+class YAMLSeq extends Collection {
     constructor(schema) {
-        super(Node.SEQ, schema);
+        super(SEQ, schema);
         this.items = [];
     }
     static get tagName() {
@@ -45,7 +43,7 @@ class YAMLSeq extends Collection.Collection {
         if (typeof idx !== 'number')
             return undefined;
         const it = this.items[idx];
-        return !keepScalar && Node.isScalar(it) ? it.value : it;
+        return !keepScalar && isScalar(it) ? it.value : it;
     }
     /**
      * Checks if the collection includes a value with the key `key`.
@@ -69,7 +67,7 @@ class YAMLSeq extends Collection.Collection {
         if (typeof idx !== 'number')
             throw new Error(`Expected a valid index, not ${key}.`);
         const prev = this.items[idx];
-        if (Node.isScalar(prev) && Scalar.isScalarValue(value))
+        if (isScalar(prev) && isScalarValue(value))
             prev.value = value;
         else
             this.items[idx] = value;
@@ -80,13 +78,13 @@ class YAMLSeq extends Collection.Collection {
             ctx.onCreate(seq);
         let i = 0;
         for (const item of this.items)
-            seq.push(toJS.toJS(item, String(i++), ctx));
+            seq.push(toJS(item, String(i++), ctx));
         return seq;
     }
     toString(ctx, onComment, onChompKeep) {
         if (!ctx)
             return JSON.stringify(this);
-        return stringifyCollection.stringifyCollection(this, ctx, {
+        return stringifyCollection(this, ctx, {
             blockItem: n => (n.comment ? n.str : `- ${n.str}`),
             flowChars: { start: '[', end: ']' },
             itemIndent: (ctx.indent || '') + '  ',
@@ -96,7 +94,7 @@ class YAMLSeq extends Collection.Collection {
     }
 }
 function asItemIndex(key) {
-    let idx = Node.isScalar(key) ? key.value : key;
+    let idx = isScalar(key) ? key.value : key;
     if (idx && typeof idx === 'string')
         idx = Number(idx);
     return typeof idx === 'number' && Number.isInteger(idx) && idx >= 0
@@ -104,4 +102,4 @@ function asItemIndex(key) {
         : null;
 }
 
-exports.YAMLSeq = YAMLSeq;
+export { YAMLSeq };

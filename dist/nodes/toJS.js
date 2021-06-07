@@ -1,6 +1,4 @@
-'use strict';
-
-var Node = require('./Node.js');
+import { hasAnchor } from './Node.js';
 
 /**
  * Recursively convert any node or its contents to native JavaScript
@@ -16,7 +14,7 @@ function toJS(value, arg, ctx) {
     if (Array.isArray(value))
         return value.map((v, i) => toJS(v, String(i), ctx));
     if (value && typeof value.toJSON === 'function') {
-        if (!ctx || !Node.hasAnchor(value))
+        if (!ctx || !hasAnchor(value))
             return value.toJSON(arg, ctx);
         const data = { aliasCount: 0, count: 1, res: undefined };
         ctx.anchors.set(value, data);
@@ -34,4 +32,4 @@ function toJS(value, arg, ctx) {
     return value;
 }
 
-exports.toJS = toJS;
+export { toJS };

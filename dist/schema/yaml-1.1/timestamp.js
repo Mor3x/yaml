@@ -1,6 +1,4 @@
-'use strict';
-
-var stringifyNumber = require('../../stringify/stringifyNumber.js');
+import { stringifyNumber } from '../../stringify/stringifyNumber.js';
 
 /** Internal types handle bigint as number, because TS can't figure it out. */
 function parseSexagesimal(str, asBigInt) {
@@ -24,7 +22,7 @@ function stringifySexagesimal(node) {
     if (typeof value === 'bigint')
         num = n => BigInt(n);
     else if (isNaN(value) || !isFinite(value))
-        return stringifyNumber.stringifyNumber(node);
+        return stringifyNumber(node);
     let sign = '';
     if (value < 0) {
         sign = '-';
@@ -100,6 +98,4 @@ const timestamp = {
     stringify: ({ value }) => value.toISOString().replace(/((T00:00)?:00)?\.000Z$/, '')
 };
 
-exports.floatTime = floatTime;
-exports.intTime = intTime;
-exports.timestamp = timestamp;
+export { floatTime, intTime, timestamp };

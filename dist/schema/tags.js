@@ -1,53 +1,51 @@
-'use strict';
-
-var map = require('./common/map.js');
-var _null = require('./common/null.js');
-var seq = require('./common/seq.js');
-var string = require('./common/string.js');
-var bool = require('./core/bool.js');
-var float = require('./core/float.js');
-var int = require('./core/int.js');
-var schema = require('./core/schema.js');
-var schema$1 = require('./json/schema.js');
-var binary = require('./yaml-1.1/binary.js');
-var omap = require('./yaml-1.1/omap.js');
-var pairs = require('./yaml-1.1/pairs.js');
-var schema$2 = require('./yaml-1.1/schema.js');
-var set = require('./yaml-1.1/set.js');
-var timestamp = require('./yaml-1.1/timestamp.js');
+import { map } from './common/map.js';
+import { nullTag } from './common/null.js';
+import { seq } from './common/seq.js';
+import { string } from './common/string.js';
+import { boolTag } from './core/bool.js';
+import { float, floatExp, floatNaN } from './core/float.js';
+import { int, intHex, intOct } from './core/int.js';
+import { schema } from './core/schema.js';
+import { schema as schema$1 } from './json/schema.js';
+import { binary } from './yaml-1.1/binary.js';
+import { omap } from './yaml-1.1/omap.js';
+import { pairs } from './yaml-1.1/pairs.js';
+import { schema as schema$2 } from './yaml-1.1/schema.js';
+import { set } from './yaml-1.1/set.js';
+import { floatTime, intTime, timestamp } from './yaml-1.1/timestamp.js';
 
 const schemas = {
-    core: schema.schema,
-    failsafe: [map.map, seq.seq, string.string],
-    json: schema$1.schema,
-    yaml11: schema$2.schema,
-    'yaml-1.1': schema$2.schema
+    core: schema,
+    failsafe: [map, seq, string],
+    json: schema$1,
+    yaml11: schema$2,
+    'yaml-1.1': schema$2
 };
 const tagsByName = {
-    binary: binary.binary,
-    bool: bool.boolTag,
-    float: float.float,
-    floatExp: float.floatExp,
-    floatNaN: float.floatNaN,
-    floatTime: timestamp.floatTime,
-    int: int.int,
-    intHex: int.intHex,
-    intOct: int.intOct,
-    intTime: timestamp.intTime,
-    map: map.map,
-    null: _null.nullTag,
-    omap: omap.omap,
-    pairs: pairs.pairs,
-    seq: seq.seq,
-    set: set.set,
-    timestamp: timestamp.timestamp
+    binary,
+    bool: boolTag,
+    float,
+    floatExp,
+    floatNaN,
+    floatTime,
+    int,
+    intHex,
+    intOct,
+    intTime,
+    map,
+    null: nullTag,
+    omap,
+    pairs,
+    seq,
+    set,
+    timestamp
 };
 const coreKnownTags = {
-    'tag:yaml.org,2002:binary': binary.binary,
-    'tag:yaml.org,2002:omap': omap.omap,
-    'tag:yaml.org,2002:pairs': pairs.pairs,
-    'tag:yaml.org,2002:set': set.set,
-    'tag:yaml.org,2002:timestamp': timestamp.timestamp
+    'tag:yaml.org,2002:binary': binary,
+    'tag:yaml.org,2002:omap': omap,
+    'tag:yaml.org,2002:pairs': pairs,
+    'tag:yaml.org,2002:set': set,
+    'tag:yaml.org,2002:timestamp': timestamp
 };
 function getTags(customTags, schemaName) {
     let tags = schemas[schemaName];
@@ -78,5 +76,4 @@ function getTags(customTags, schemaName) {
     });
 }
 
-exports.coreKnownTags = coreKnownTags;
-exports.getTags = getTags;
+export { coreKnownTags, getTags };

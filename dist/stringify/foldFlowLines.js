@@ -1,5 +1,3 @@
-'use strict';
-
 const FOLD_FLOW = 'flow';
 const FOLD_BLOCK = 'block';
 const FOLD_QUOTED = 'quoted';
@@ -134,7 +132,4 @@ function consumeMoreIndentedLines(text, i) {
     return i;
 }
 
-exports.FOLD_BLOCK = FOLD_BLOCK;
-exports.FOLD_FLOW = FOLD_FLOW;
-exports.FOLD_QUOTED = FOLD_QUOTED;
-exports.foldFlowLines = foldFlowLines;
+export { FOLD_BLOCK, FOLD_FLOW, FOLD_QUOTED, foldFlowLines };

@@ -1,19 +1,17 @@
-'use strict';
-
-var Pair = require('../nodes/Pair.js');
-var YAMLMap = require('../nodes/YAMLMap.js');
-var resolveProps = require('./resolve-props.js');
-var utilContainsNewline = require('./util-contains-newline.js');
-var utilMapIncludes = require('./util-map-includes.js');
+import { Pair } from '../nodes/Pair.js';
+import { YAMLMap } from '../nodes/YAMLMap.js';
+import { resolveProps } from './resolve-props.js';
+import { containsNewline } from './util-contains-newline.js';
+import { mapIncludes } from './util-map-includes.js';
 
 const startColMsg = 'All mapping items must start at the same column';
 function resolveBlockMap({ composeNode, composeEmptyNode }, ctx, bm, onError) {
     var _a;
-    const map = new YAMLMap.YAMLMap(ctx.schema);
+    const map = new YAMLMap(ctx.schema);
     let offset = bm.offset;
     for (const { start, key, sep, value } of bm.items) {
         // key properties
-        const keyProps = resolveProps.resolveProps(start, {
+        const keyProps = resolveProps(start, {
             ctx,
             indicator: 'explicit-key-ind',
             offset,
@@ -41,7 +39,7 @@ function resolveBlockMap({ composeNode, composeEmptyNode }, ctx, bm, onError) {
         }
         else if (((_a = keyProps.found) === null || _a === void 0 ? void 0 : _a.indent) !== bm.indent)
             onError(offset, 'BAD_INDENT', startColMsg);
-        if (implicitKey && utilContainsNewline.containsNewline(key))
+        if (implicitKey && containsNewline(key))
             onError(key, // checked by containsNewline()
             'MULTILINE_IMPLICIT_KEY', 'Implicit keys need to be on a single line');
         // key value
@@ -49,10 +47,10 @@ function resolveBlockMap({ composeNode, composeEmptyNode }, ctx, bm, onError) {
         const keyNode = key
             ? composeNode(ctx, key, keyProps, onError)
             : composeEmptyNode(ctx, keyStart, start, null, keyProps, onError);
-        if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
+        if (mapIncludes(ctx, map.items, keyNode))
             onError(keyStart, 'DUPLICATE_KEY', 'Map keys must be unique');
         // value properties
-        const valueProps = resolveProps.resolveProps(sep || [], {
+        const valueProps = resolveProps(sep || [], {
             ctx,
             indicator: 'map-value-ind',
             offset: keyNode.range[2],
@@ -73,7 +71,7 @@ function resolveBlockMap({ composeNode, composeEmptyNode }, ctx, bm, onError) {
                 ? composeNode(ctx, value, valueProps, onError)
                 : composeEmptyNode(ctx, offset, sep, null, valueProps, onError);
             offset = valueNode.range[2];
-            map.items.push(new Pair.Pair(keyNode, valueNode));
+            map.items.push(new Pair(keyNode, valueNode));
         }
         else {
             // key with no value
@@ -85,11 +83,11 @@ function resolveBlockMap({ composeNode, composeEmptyNode }, ctx, bm, onError) {
                 else
                     keyNode.comment = valueProps.comment;
             }
-            map.items.push(new Pair.Pair(keyNode));
+            map.items.push(new Pair(keyNode));
         }
     }
     map.range = [bm.offset, offset, offset];
     return map;
 }
 
-exports.resolveBlockMap = resolveBlockMap;
+export { resolveBlockMap };

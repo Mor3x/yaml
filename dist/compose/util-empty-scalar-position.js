@@ -1,5 +1,3 @@
-'use strict';
-
 function emptyScalarPosition(offset, before, pos) {
     if (before) {
         if (pos === null)
@@ -26,4 +24,4 @@ function emptyScalarPosition(offset, before, pos) {
     return offset;
 }
 
-exports.emptyScalarPosition = emptyScalarPosition;
+export { emptyScalarPosition };

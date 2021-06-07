@@ -1,8 +1,6 @@
-'use strict';
-
-var cstScalar = require('./cst-scalar.js');
-var cstStringify = require('./cst-stringify.js');
-var cstVisit = require('./cst-visit.js');
+export { createScalarToken, resolveAsScalar, setScalarValue } from './cst-scalar.js';
+export { stringify } from './cst-stringify.js';
+export { visit } from './cst-visit.js';
 
 /** The byte order mark */
 const BOM = '\u{FEFF}';
@@ -97,16 +95,4 @@ function tokenType(source) {
     return null;
 }
 
-exports.createScalarToken = cstScalar.createScalarToken;
-exports.resolveAsScalar = cstScalar.resolveAsScalar;
-exports.setScalarValue = cstScalar.setScalarValue;
-exports.stringify = cstStringify.stringify;
-exports.visit = cstVisit.visit;
-exports.BOM = BOM;
-exports.DOCUMENT = DOCUMENT;
-exports.FLOW_END = FLOW_END;
-exports.SCALAR = SCALAR;
-exports.isCollection = isCollection;
-exports.isScalar = isScalar;
-exports.prettyToken = prettyToken;
-exports.tokenType = tokenType;
+export { BOM, DOCUMENT, FLOW_END, SCALAR, isCollection, isScalar, prettyToken, tokenType };

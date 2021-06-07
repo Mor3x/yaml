@@ -1,5 +1,3 @@
-'use strict';
-
 const ALIAS = Symbol.for('yaml.alias');
 const DOC = Symbol.for('yaml.document');
 const MAP = Symbol.for('yaml.map');
@@ -40,20 +38,4 @@ class NodeBase {
     }
 }
 
-exports.ALIAS = ALIAS;
-exports.DOC = DOC;
-exports.MAP = MAP;
-exports.NODE_TYPE = NODE_TYPE;
-exports.NodeBase = NodeBase;
-exports.PAIR = PAIR;
-exports.SCALAR = SCALAR;
-exports.SEQ = SEQ;
-exports.hasAnchor = hasAnchor;
-exports.isAlias = isAlias;
-exports.isCollection = isCollection;
-exports.isDocument = isDocument;
-exports.isMap = isMap;
-exports.isNode = isNode;
-exports.isPair = isPair;
-exports.isScalar = isScalar;
-exports.isSeq = isSeq;
+export { ALIAS, DOC, MAP, NODE_TYPE, NodeBase, PAIR, SCALAR, SEQ, hasAnchor, isAlias, isCollection, isDocument, isMap, isNode, isPair, isScalar, isSeq };

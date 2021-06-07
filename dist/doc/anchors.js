@@ -1,7 +1,5 @@
-'use strict';
-
-var Node = require('../nodes/Node.js');
-var visit = require('../visit.js');
+import { isScalar, isCollection } from '../nodes/Node.js';
+import { visit } from '../visit.js';
 
 /**
  * Verify that the input string is a valid anchor.
@@ -18,7 +16,7 @@ function anchorIsValid(anchor) {
 }
 function anchorNames(root) {
     const anchors = new Set();
-    visit.visit(root, {
+    visit(root, {
         Value(_key, node) {
             if (node.anchor)
                 anchors.add(node.anchor);
@@ -57,7 +55,7 @@ function createNodeAnchors(doc, prefix) {
                 const ref = sourceObjects.get(source);
                 if (typeof ref === 'object' &&
                     ref.anchor &&
-                    (Node.isScalar(ref.node) || Node.isCollection(ref.node))) {
+                    (isScalar(ref.node) || isCollection(ref.node))) {
                     ref.node.anchor = ref.anchor;
                 }
                 else {
@@ -71,7 +69,4 @@ function createNodeAnchors(doc, prefix) {
     };
 }
 
-exports.anchorIsValid = anchorIsValid;
-exports.anchorNames = anchorNames;
-exports.createNodeAnchors = createNodeAnchors;
-exports.findNewAnchor = findNewAnchor;
+export { anchorIsValid, anchorNames, createNodeAnchors, findNewAnchor };

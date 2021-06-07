@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Applies the JSON.parse reviver algorithm as defined in the ECMA-262 spec,
  * in section 24.5.1.1 "Runtime Semantics: InternalizeJSONProperty" of the
@@ -53,4 +51,4 @@ function applyReviver(reviver, obj, key, val) {
     return reviver.call(obj, key, val);
 }
 
-exports.applyReviver = applyReviver;
+export { applyReviver };

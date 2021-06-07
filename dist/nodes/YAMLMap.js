@@ -1,27 +1,25 @@
-'use strict';
-
-var stringifyCollection = require('../stringify/stringifyCollection.js');
-var addPairToJSMap = require('./addPairToJSMap.js');
-var Collection = require('./Collection.js');
-var Node = require('./Node.js');
-var Pair = require('./Pair.js');
-var Scalar = require('./Scalar.js');
+import { stringifyCollection } from '../stringify/stringifyCollection.js';
+import { addPairToJSMap } from './addPairToJSMap.js';
+import { Collection } from './Collection.js';
+import { isPair, isScalar, MAP } from './Node.js';
+import { Pair } from './Pair.js';
+import { isScalarValue } from './Scalar.js';
 
 function findPair(items, key) {
-    const k = Node.isScalar(key) ? key.value : key;
+    const k = isScalar(key) ? key.value : key;
     for (const it of items) {
-        if (Node.isPair(it)) {
+        if (isPair(it)) {
             if (it.key === key || it.key === k)
                 return it;
-            if (Node.isScalar(it.key) && it.key.value === k)
+            if (isScalar(it.key) && it.key.value === k)
                 return it;
         }
     }
     return undefined;
 }
-class YAMLMap extends Collection.Collection {
+class YAMLMap extends Collection {
     constructor(schema) {
-        super(Node.MAP, schema);
+        super(MAP, schema);
         this.items = [];
     }
     static get tagName() {
@@ -35,21 +33,21 @@ class YAMLMap extends Collection.Collection {
      */
     add(pair, overwrite) {
         let _pair;
-        if (Node.isPair(pair))
+        if (isPair(pair))
             _pair = pair;
         else if (!pair || typeof pair !== 'object' || !('key' in pair)) {
             // In TypeScript, this never happens.
-            _pair = new Pair.Pair(pair, pair.value);
+            _pair = new Pair(pair, pair.value);
         }
         else
-            _pair = new Pair.Pair(pair.key, pair.value);
+            _pair = new Pair(pair.key, pair.value);
         const prev = findPair(this.items, _pair.key);
         const sortEntries = this.schema && this.schema.sortMapEntries;
         if (prev) {
             if (!overwrite)
                 throw new Error(`Key ${_pair.key} already set`);
             // For scalars, keep the old node & its comments and anchors
-            if (Node.isScalar(prev.value) && Scalar.isScalarValue(_pair.value))
+            if (isScalar(prev.value) && isScalarValue(_pair.value))
                 prev.value.value = _pair.value;
             else
                 prev.value = _pair.value;
@@ -75,13 +73,13 @@ class YAMLMap extends Collection.Collection {
     get(key, keepScalar) {
         const it = findPair(this.items, key);
         const node = it && it.value;
-        return !keepScalar && Node.isScalar(node) ? node.value : node;
+        return !keepScalar && isScalar(node) ? node.value : node;
     }
     has(key) {
         return !!findPair(this.items, key);
     }
     set(key, value) {
-        this.add(new Pair.Pair(key, value), true);
+        this.add(new Pair(key, value), true);
     }
     /**
      * @param ctx - Conversion context, originally set in Document#toJS()
@@ -93,19 +91,19 @@ class YAMLMap extends Collection.Collection {
         if (ctx && ctx.onCreate)
             ctx.onCreate(map);
         for (const item of this.items)
-            addPairToJSMap.addPairToJSMap(ctx, map, item);
+            addPairToJSMap(ctx, map, item);
         return map;
     }
     toString(ctx, onComment, onChompKeep) {
         if (!ctx)
             return JSON.stringify(this);
         for (const item of this.items) {
-            if (!Node.isPair(item))
+            if (!isPair(item))
                 throw new Error(`Map items must all be pairs; found ${JSON.stringify(item)} instead`);
         }
         if (!ctx.allNullValues && this.hasAllNullValues(false))
             ctx = Object.assign({}, ctx, { allNullValues: true });
-        return stringifyCollection.stringifyCollection(this, ctx, {
+        return stringifyCollection(this, ctx, {
             blockItem: n => n.str,
             flowChars: { start: '{', end: '}' },
             itemIndent: ctx.indent || '',
@@ -115,5 +113,4 @@ class YAMLMap extends Collection.Collection {
     }
 }
 
-exports.YAMLMap = YAMLMap;
-exports.findPair = findPair;
+export { YAMLMap, findPair };

@@ -1,19 +1,17 @@
-'use strict';
+import { YAMLSeq } from '../../nodes/YAMLSeq.js';
+import { toJS } from '../../nodes/toJS.js';
+import { isScalar, isPair } from '../../nodes/Node.js';
+import { YAMLMap } from '../../nodes/YAMLMap.js';
+import { resolvePairs, createPairs } from './pairs.js';
 
-var YAMLSeq = require('../../nodes/YAMLSeq.js');
-var toJS = require('../../nodes/toJS.js');
-var Node = require('../../nodes/Node.js');
-var YAMLMap = require('../../nodes/YAMLMap.js');
-var pairs = require('./pairs.js');
-
-class YAMLOMap extends YAMLSeq.YAMLSeq {
+class YAMLOMap extends YAMLSeq {
     constructor() {
         super();
-        this.add = YAMLMap.YAMLMap.prototype.add.bind(this);
-        this.delete = YAMLMap.YAMLMap.prototype.delete.bind(this);
-        this.get = YAMLMap.YAMLMap.prototype.get.bind(this);
-        this.has = YAMLMap.YAMLMap.prototype.has.bind(this);
-        this.set = YAMLMap.YAMLMap.prototype.set.bind(this);
+        this.add = YAMLMap.prototype.add.bind(this);
+        this.delete = YAMLMap.prototype.delete.bind(this);
+        this.get = YAMLMap.prototype.get.bind(this);
+        this.has = YAMLMap.prototype.has.bind(this);
+        this.set = YAMLMap.prototype.set.bind(this);
         this.tag = YAMLOMap.tag;
     }
     /**
@@ -28,12 +26,12 @@ class YAMLOMap extends YAMLSeq.YAMLSeq {
             ctx.onCreate(map);
         for (const pair of this.items) {
             let key, value;
-            if (Node.isPair(pair)) {
-                key = toJS.toJS(pair.key, '', ctx);
-                value = toJS.toJS(pair.value, key, ctx);
+            if (isPair(pair)) {
+                key = toJS(pair.key, '', ctx);
+                value = toJS(pair.value, key, ctx);
             }
             else {
-                key = toJS.toJS(pair, '', ctx);
+                key = toJS(pair, '', ctx);
             }
             if (map.has(key))
                 throw new Error('Ordered maps must not include duplicate keys');
@@ -50,10 +48,10 @@ const omap = {
     default: false,
     tag: 'tag:yaml.org,2002:omap',
     resolve(seq, onError) {
-        const pairs$1 = pairs.resolvePairs(seq, onError);
+        const pairs = resolvePairs(seq, onError);
         const seenKeys = [];
-        for (const { key } of pairs$1.items) {
-            if (Node.isScalar(key)) {
+        for (const { key } of pairs.items) {
+            if (isScalar(key)) {
                 if (seenKeys.includes(key.value)) {
                     onError(`Ordered maps must not include duplicate keys: ${key.value}`);
                 }
@@ -62,15 +60,14 @@ const omap = {
                 }
             }
         }
-        return Object.assign(new YAMLOMap(), pairs$1);
+        return Object.assign(new YAMLOMap(), pairs);
     },
     createNode(schema, iterable, ctx) {
-        const pairs$1 = pairs.createPairs(schema, iterable, ctx);
+        const pairs = createPairs(schema, iterable, ctx);
         const omap = new YAMLOMap();
-        omap.items = pairs$1.items;
+        omap.items = pairs.items;
         return omap;
     }
 };
 
-exports.YAMLOMap = YAMLOMap;
-exports.omap = omap;
+export { YAMLOMap, omap };

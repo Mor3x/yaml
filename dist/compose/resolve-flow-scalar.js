@@ -1,7 +1,5 @@
-'use strict';
-
-var Scalar = require('../nodes/Scalar.js');
-var resolveEnd = require('./resolve-end.js');
+import { Scalar } from '../nodes/Scalar.js';
+import { resolveEnd } from './resolve-end.js';
 
 function resolveFlowScalar(scalar, strict, onError) {
     const { offset, type, source, end } = scalar;
@@ -10,15 +8,15 @@ function resolveFlowScalar(scalar, strict, onError) {
     const _onError = (rel, code, msg) => onError(offset + rel, code, msg);
     switch (type) {
         case 'scalar':
-            _type = Scalar.Scalar.PLAIN;
+            _type = Scalar.PLAIN;
             value = plainValue(source, _onError);
             break;
         case 'single-quoted-scalar':
-            _type = Scalar.Scalar.QUOTE_SINGLE;
+            _type = Scalar.QUOTE_SINGLE;
             value = singleQuotedValue(source, _onError);
             break;
         case 'double-quoted-scalar':
-            _type = Scalar.Scalar.QUOTE_DOUBLE;
+            _type = Scalar.QUOTE_DOUBLE;
             value = doubleQuotedValue(source, _onError);
             break;
         /* istanbul ignore next should not happen */
@@ -32,7 +30,7 @@ function resolveFlowScalar(scalar, strict, onError) {
             };
     }
     const valueEnd = offset + source.length;
-    const re = resolveEnd.resolveEnd(end, valueEnd, strict, onError);
+    const re = resolveEnd(end, valueEnd, strict, onError);
     return {
         value,
         type: _type,
@@ -210,4 +208,4 @@ function parseCharCode(source, offset, length, onError) {
     return String.fromCodePoint(code);
 }
 
-exports.resolveFlowScalar = resolveFlowScalar;
+export { resolveFlowScalar };

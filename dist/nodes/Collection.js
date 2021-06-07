@@ -1,7 +1,5 @@
-'use strict';
-
-var createNode = require('../doc/createNode.js');
-var Node = require('./Node.js');
+import { createNode } from '../doc/createNode.js';
+import { NodeBase, isCollection, isScalar, isPair } from './Node.js';
 
 function collectionFromPath(schema, path, value) {
     let v = value;
@@ -23,7 +21,7 @@ function collectionFromPath(schema, path, value) {
             v = o;
         }
     }
-    return createNode.createNode(v, undefined, {
+    return createNode(v, undefined, {
         onAnchor() {
             throw new Error('Repeated objects are not supported here');
         },
@@ -34,7 +32,7 @@ function collectionFromPath(schema, path, value) {
 // null, undefined, or an empty non-string iterable (e.g. [])
 const isEmptyPath = (path) => path == null ||
     (typeof path === 'object' && !!path[Symbol.iterator]().next().done);
-class Collection extends Node.NodeBase {
+class Collection extends NodeBase {
     constructor(type, schema) {
         super(type);
         Object.defineProperty(this, 'schema', {
@@ -55,7 +53,7 @@ class Collection extends Node.NodeBase {
         else {
             const [key, ...rest] = path;
             const node = this.get(key, true);
-            if (Node.isCollection(node))
+            if (isCollection(node))
                 node.addIn(rest, value);
             else if (node === undefined && this.schema)
                 this.set(key, collectionFromPath(this.schema, rest, value));
@@ -71,7 +69,7 @@ class Collection extends Node.NodeBase {
         if (rest.length === 0)
             return this.delete(key);
         const node = this.get(key, true);
-        if (Node.isCollection(node))
+        if (isCollection(node))
             return node.deleteIn(rest);
         else
             throw new Error(`Expected YAML collection at ${key}. Remaining path: ${rest}`);
@@ -84,18 +82,18 @@ class Collection extends Node.NodeBase {
     getIn([key, ...rest], keepScalar) {
         const node = this.get(key, true);
         if (rest.length === 0)
-            return !keepScalar && Node.isScalar(node) ? node.value : node;
+            return !keepScalar && isScalar(node) ? node.value : node;
         else
-            return Node.isCollection(node) ? node.getIn(rest, keepScalar) : undefined;
+            return isCollection(node) ? node.getIn(rest, keepScalar) : undefined;
     }
     hasAllNullValues(allowScalar) {
         return this.items.every(node => {
-            if (!Node.isPair(node))
+            if (!isPair(node))
                 return false;
             const n = node.value;
             return (n == null ||
                 (allowScalar &&
-                    Node.isScalar(n) &&
+                    isScalar(n) &&
                     n.value == null &&
                     !n.commentBefore &&
                     !n.comment &&
@@ -109,7 +107,7 @@ class Collection extends Node.NodeBase {
         if (rest.length === 0)
             return this.has(key);
         const node = this.get(key, true);
-        return Node.isCollection(node) ? node.hasIn(rest) : false;
+        return isCollection(node) ? node.hasIn(rest) : false;
     }
     /**
      * Sets a value in this collection. For `!!set`, `value` needs to be a
@@ -121,7 +119,7 @@ class Collection extends Node.NodeBase {
         }
         else {
             const node = this.get(key, true);
-            if (Node.isCollection(node))
+            if (isCollection(node))
                 node.setIn(rest, value);
             else if (node === undefined && this.schema)
                 this.set(key, collectionFromPath(this.schema, rest, value));
@@ -132,6 +130,4 @@ class Collection extends Node.NodeBase {
 }
 Collection.maxFlowStringSingleLineLength = 60;
 
-exports.Collection = Collection;
-exports.collectionFromPath = collectionFromPath;
-exports.isEmptyPath = isEmptyPath;
+export { Collection, collectionFromPath, isEmptyPath };

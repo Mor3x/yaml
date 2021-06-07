@@ -1,16 +1,14 @@
-'use strict';
-
-var Node = require('./Node.js');
-var toJS = require('./toJS.js');
+import { NodeBase, SCALAR } from './Node.js';
+import { toJS } from './toJS.js';
 
 const isScalarValue = (value) => !value || (typeof value !== 'function' && typeof value !== 'object');
-class Scalar extends Node.NodeBase {
+class Scalar extends NodeBase {
     constructor(value) {
-        super(Node.SCALAR);
+        super(SCALAR);
         this.value = value;
     }
     toJSON(arg, ctx) {
-        return ctx && ctx.keep ? this.value : toJS.toJS(this.value, arg, ctx);
+        return ctx && ctx.keep ? this.value : toJS(this.value, arg, ctx);
     }
     toString() {
         return String(this.value);
@@ -22,5 +20,4 @@ Scalar.PLAIN = 'PLAIN';
 Scalar.QUOTE_DOUBLE = 'QUOTE_DOUBLE';
 Scalar.QUOTE_SINGLE = 'QUOTE_SINGLE';
 
-exports.Scalar = Scalar;
-exports.isScalarValue = isScalarValue;
+export { Scalar, isScalarValue };

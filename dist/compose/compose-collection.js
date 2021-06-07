@@ -1,24 +1,22 @@
-'use strict';
-
-var Node = require('../nodes/Node.js');
-var Scalar = require('../nodes/Scalar.js');
-var resolveBlockMap = require('./resolve-block-map.js');
-var resolveBlockSeq = require('./resolve-block-seq.js');
-var resolveFlowCollection = require('./resolve-flow-collection.js');
+import { isNode, isMap } from '../nodes/Node.js';
+import { Scalar } from '../nodes/Scalar.js';
+import { resolveBlockMap } from './resolve-block-map.js';
+import { resolveBlockSeq } from './resolve-block-seq.js';
+import { resolveFlowCollection } from './resolve-flow-collection.js';
 
 function composeCollection(CN, ctx, token, tagToken, onError) {
     let coll;
     switch (token.type) {
         case 'block-map': {
-            coll = resolveBlockMap.resolveBlockMap(CN, ctx, token, onError);
+            coll = resolveBlockMap(CN, ctx, token, onError);
             break;
         }
         case 'block-seq': {
-            coll = resolveBlockSeq.resolveBlockSeq(CN, ctx, token, onError);
+            coll = resolveBlockSeq(CN, ctx, token, onError);
             break;
         }
         case 'flow-collection': {
-            coll = resolveFlowCollection.resolveFlowCollection(CN, ctx, token, onError);
+            coll = resolveFlowCollection(CN, ctx, token, onError);
             break;
         }
     }
@@ -33,7 +31,7 @@ function composeCollection(CN, ctx, token, tagToken, onError) {
         coll.tag = Coll.tagName;
         return coll;
     }
-    const expType = Node.isMap(coll) ? 'map' : 'seq';
+    const expType = isMap(coll) ? 'map' : 'seq';
     let tag = ctx.schema.tags.find(t => t.collection === expType && t.tag === tagName);
     if (!tag) {
         const kt = ctx.schema.knownTags[tagName];
@@ -48,9 +46,9 @@ function composeCollection(CN, ctx, token, tagToken, onError) {
         }
     }
     const res = tag.resolve(coll, msg => onError(tagToken, 'TAG_RESOLVE_FAILED', msg), ctx.options);
-    const node = Node.isNode(res)
+    const node = isNode(res)
         ? res
-        : new Scalar.Scalar(res);
+        : new Scalar(res);
     node.range = coll.range;
     node.tag = tagName;
     if (tag === null || tag === void 0 ? void 0 : tag.format)
@@ -58,4 +56,4 @@ function composeCollection(CN, ctx, token, tagToken, onError) {
     return node;
 }
 
-exports.composeCollection = composeCollection;
+export { composeCollection };

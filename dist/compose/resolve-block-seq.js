@@ -1,13 +1,11 @@
-'use strict';
-
-var YAMLSeq = require('../nodes/YAMLSeq.js');
-var resolveProps = require('./resolve-props.js');
+import { YAMLSeq } from '../nodes/YAMLSeq.js';
+import { resolveProps } from './resolve-props.js';
 
 function resolveBlockSeq({ composeNode, composeEmptyNode }, ctx, bs, onError) {
-    const seq = new YAMLSeq.YAMLSeq(ctx.schema);
+    const seq = new YAMLSeq(ctx.schema);
     let offset = bs.offset;
     for (const { start, value } of bs.items) {
-        const props = resolveProps.resolveProps(start, {
+        const props = resolveProps(start, {
             ctx,
             indicator: 'seq-item-ind',
             offset,
@@ -39,4 +37,4 @@ function resolveBlockSeq({ composeNode, composeEmptyNode }, ctx, bs, onError) {
     return seq;
 }
 
-exports.resolveBlockSeq = resolveBlockSeq;
+export { resolveBlockSeq };

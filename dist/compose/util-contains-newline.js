@@ -1,5 +1,3 @@
-'use strict';
-
 function containsNewline(key) {
     if (!key)
         return null;
@@ -33,4 +31,4 @@ function containsNewline(key) {
     }
 }
 
-exports.containsNewline = containsNewline;
+export { containsNewline };

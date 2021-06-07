@@ -1,5 +1,3 @@
-'use strict';
-
 function stringifyNumber({ format, minFractionDigits, tag, value }) {
     if (typeof value === 'bigint')
         return String(value);
@@ -23,4 +21,4 @@ function stringifyNumber({ format, minFractionDigits, tag, value }) {
     return n;
 }
 
-exports.stringifyNumber = stringifyNumber;
+export { stringifyNumber };

@@ -1,9 +1,7 @@
-'use strict';
-
-var Collection = require('../nodes/Collection.js');
-var Node = require('../nodes/Node.js');
-var stringify = require('./stringify.js');
-var stringifyComment = require('./stringifyComment.js');
+import { Collection } from '../nodes/Collection.js';
+import { isNode, isPair } from '../nodes/Node.js';
+import { stringify } from './stringify.js';
+import { addComment, stringifyComment } from './stringifyComment.js';
 
 function stringifyCollection({ comment, flow, items }, ctx, { blockItem, flowChars, itemIndent, onChompKeep, onComment }) {
     const { indent, indentStep } = ctx;
@@ -15,7 +13,7 @@ function stringifyCollection({ comment, flow, items }, ctx, { blockItem, flowCha
     let chompKeep = false; // flag for the preceding node's status
     const nodes = items.reduce((nodes, item, i) => {
         let comment = null;
-        if (Node.isNode(item)) {
+        if (isNode(item)) {
             if (!chompKeep && item.spaceBefore)
                 nodes.push({ comment: true, str: '' });
             let cb = item.commentBefore;
@@ -35,8 +33,8 @@ function stringifyCollection({ comment, flow, items }, ctx, { blockItem, flowCha
                 singleLineOutput = false;
             }
         }
-        else if (Node.isPair(item)) {
-            const ik = Node.isNode(item.key) ? item.key : null;
+        else if (isPair(item)) {
+            const ik = isNode(item.key) ? item.key : null;
             if (ik) {
                 if (!chompKeep && ik.spaceBefore)
                     nodes.push({ comment: true, str: '' });
@@ -56,7 +54,7 @@ function stringifyCollection({ comment, flow, items }, ctx, { blockItem, flowCha
                     singleLineOutput = false;
             }
             if (inFlow) {
-                const iv = Node.isNode(item.value) ? item.value : null;
+                const iv = isNode(item.value) ? item.value : null;
                 if (iv) {
                     if (iv.comment)
                         comment = iv.comment;
@@ -69,10 +67,10 @@ function stringifyCollection({ comment, flow, items }, ctx, { blockItem, flowCha
             }
         }
         chompKeep = false;
-        let str = stringify.stringify(item, ctx, () => (comment = null), () => (chompKeep = true));
+        let str = stringify(item, ctx, () => (comment = null), () => (chompKeep = true));
         if (inFlow && i < items.length - 1)
             str += ',';
-        str = stringifyComment.addComment(str, itemIndent, comment);
+        str = addComment(str, itemIndent, comment);
         if (chompKeep && (comment || inFlow))
             chompKeep = false;
         nodes.push({ comment: false, str });
@@ -94,7 +92,7 @@ function stringifyCollection({ comment, flow, items }, ctx, { blockItem, flowCha
             singleLineLength += node.str.length + 2;
         }
         if (!singleLineOutput ||
-            singleLineLength > Collection.Collection.maxFlowStringSingleLineLength) {
+            singleLineLength > Collection.maxFlowStringSingleLineLength) {
             str = start;
             for (const s of strings) {
                 str += s ? `\n${indentStep}${indent}${s}` : '\n';
@@ -112,7 +110,7 @@ function stringifyCollection({ comment, flow, items }, ctx, { blockItem, flowCha
             str += s ? `\n${indent}${s}` : '\n';
     }
     if (comment) {
-        str += '\n' + stringifyComment.stringifyComment(comment, indent);
+        str += '\n' + stringifyComment(comment, indent);
         if (onComment)
             onComment();
     }
@@ -121,4 +119,4 @@ function stringifyCollection({ comment, flow, items }, ctx, { blockItem, flowCha
     return str;
 }
 
-exports.stringifyCollection = stringifyCollection;
+export { stringifyCollection };

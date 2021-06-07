@@ -1,39 +1,37 @@
-'use strict';
-
-var map = require('../common/map.js');
-var _null = require('../common/null.js');
-var seq = require('../common/seq.js');
-var string = require('../common/string.js');
-var binary = require('./binary.js');
-var bool = require('./bool.js');
-var float = require('./float.js');
-var int = require('./int.js');
-var omap = require('./omap.js');
-var pairs = require('./pairs.js');
-var set = require('./set.js');
-var timestamp = require('./timestamp.js');
+import { map } from '../common/map.js';
+import { nullTag } from '../common/null.js';
+import { seq } from '../common/seq.js';
+import { string } from '../common/string.js';
+import { binary } from './binary.js';
+import { trueTag, falseTag } from './bool.js';
+import { floatNaN, floatExp, float } from './float.js';
+import { intBin, intOct, int, intHex } from './int.js';
+import { omap } from './omap.js';
+import { pairs } from './pairs.js';
+import { set } from './set.js';
+import { intTime, floatTime, timestamp } from './timestamp.js';
 
 const schema = [
-    map.map,
-    seq.seq,
-    string.string,
-    _null.nullTag,
-    bool.trueTag,
-    bool.falseTag,
-    int.intBin,
-    int.intOct,
-    int.int,
-    int.intHex,
-    float.floatNaN,
-    float.floatExp,
-    float.float,
-    binary.binary,
-    omap.omap,
-    pairs.pairs,
-    set.set,
-    timestamp.intTime,
-    timestamp.floatTime,
-    timestamp.timestamp
+    map,
+    seq,
+    string,
+    nullTag,
+    trueTag,
+    falseTag,
+    intBin,
+    intOct,
+    int,
+    intHex,
+    floatNaN,
+    floatExp,
+    float,
+    binary,
+    omap,
+    pairs,
+    set,
+    intTime,
+    floatTime,
+    timestamp
 ];
 
-exports.schema = schema;
+export { schema };

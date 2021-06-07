@@ -1,8 +1,6 @@
-'use strict';
-
-var anchors = require('../doc/anchors.js');
-var Node = require('../nodes/Node.js');
-var stringifyString = require('./stringifyString.js');
+import { anchorIsValid } from '../doc/anchors.js';
+import { isPair, isAlias, isNode, isScalar, isCollection } from '../nodes/Node.js';
+import { stringifyString } from './stringifyString.js';
 
 const createStringifyContext = (doc, options) => ({
     anchors: new Set(),
@@ -34,7 +32,7 @@ function getTagObject(tags, item) {
     }
     let tagObj = undefined;
     let obj;
-    if (Node.isScalar(item)) {
+    if (isScalar(item)) {
         obj = item.value;
         const match = tags.filter(t => t.identify && t.identify(obj));
         tagObj =
@@ -52,11 +50,11 @@ function getTagObject(tags, item) {
     return tagObj;
 }
 // needs to be called before value stringifier to allow for circular anchor refs
-function stringifyProps(node, tagObj, { anchors: anchors$1, doc }) {
+function stringifyProps(node, tagObj, { anchors, doc }) {
     const props = [];
-    const anchor = (Node.isScalar(node) || Node.isCollection(node)) && node.anchor;
-    if (anchor && anchors.anchorIsValid(anchor)) {
-        anchors$1.add(anchor);
+    const anchor = (isScalar(node) || isCollection(node)) && node.anchor;
+    if (anchor && anchorIsValid(anchor)) {
+        anchors.add(anchor);
         props.push(`&${anchor}`);
     }
     if (node.tag) {
@@ -68,12 +66,12 @@ function stringifyProps(node, tagObj, { anchors: anchors$1, doc }) {
     return props.join(' ');
 }
 function stringify(item, ctx, onComment, onChompKeep) {
-    if (Node.isPair(item))
+    if (isPair(item))
         return item.toString(ctx, onComment, onChompKeep);
-    if (Node.isAlias(item))
+    if (isAlias(item))
         return item.toString(ctx);
     let tagObj = undefined;
-    const node = Node.isNode(item)
+    const node = isNode(item)
         ? item
         : ctx.doc.createNode(item, { onTagObj: o => (tagObj = o) });
     if (!tagObj)
@@ -83,15 +81,14 @@ function stringify(item, ctx, onComment, onChompKeep) {
         ctx.indentAtStart = (ctx.indentAtStart || 0) + props.length + 1;
     const str = typeof tagObj.stringify === 'function'
         ? tagObj.stringify(node, ctx, onComment, onChompKeep)
-        : Node.isScalar(node)
-            ? stringifyString.stringifyString(node, ctx, onComment, onChompKeep)
+        : isScalar(node)
+            ? stringifyString(node, ctx, onComment, onChompKeep)
             : node.toString(ctx, onComment, onChompKeep);
     if (!props)
         return str;
-    return Node.isScalar(node) || str[0] === '{' || str[0] === '['
+    return isScalar(node) || str[0] === '{' || str[0] === '['
         ? `${props} ${str}`
         : `${props}\n${ctx.indent}${str}`;
 }
 
-exports.createStringifyContext = createStringifyContext;
-exports.stringify = stringify;
+export { createStringifyContext, stringify };

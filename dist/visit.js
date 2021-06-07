@@ -1,6 +1,4 @@
-'use strict';
-
-var Node = require('./nodes/Node.js');
+import { isDocument, isMap, isSeq, isPair, isScalar, isAlias, isNode, isCollection } from './nodes/Node.js';
 
 const BREAK = Symbol('break visit');
 const SKIP = Symbol('skip children');
@@ -52,7 +50,7 @@ function visit(node, visitor) {
             Seq: visitor.Collection
         }, visitor);
     }
-    if (Node.isDocument(node)) {
+    if (isDocument(node)) {
         const cd = _visit(null, node.contents, visitor, Object.freeze([node]));
         if (cd === REMOVE)
             node.contents = null;
@@ -73,48 +71,48 @@ function _visit(key, node, visitor, path) {
     let ctrl = undefined;
     if (typeof visitor === 'function')
         ctrl = visitor(key, node, path);
-    else if (Node.isMap(node)) {
+    else if (isMap(node)) {
         if (visitor.Map)
             ctrl = visitor.Map(key, node, path);
     }
-    else if (Node.isSeq(node)) {
+    else if (isSeq(node)) {
         if (visitor.Seq)
             ctrl = visitor.Seq(key, node, path);
     }
-    else if (Node.isPair(node)) {
+    else if (isPair(node)) {
         if (visitor.Pair)
             ctrl = visitor.Pair(key, node, path);
     }
-    else if (Node.isScalar(node)) {
+    else if (isScalar(node)) {
         if (visitor.Scalar)
             ctrl = visitor.Scalar(key, node, path);
     }
-    else if (Node.isAlias(node)) {
+    else if (isAlias(node)) {
         if (visitor.Alias)
             ctrl = visitor.Alias(key, node, path);
     }
-    if (Node.isNode(ctrl) || Node.isPair(ctrl)) {
+    if (isNode(ctrl) || isPair(ctrl)) {
         const parent = path[path.length - 1];
-        if (Node.isCollection(parent)) {
+        if (isCollection(parent)) {
             parent.items[key] = ctrl;
         }
-        else if (Node.isPair(parent)) {
+        else if (isPair(parent)) {
             if (key === 'key')
                 parent.key = ctrl;
             else
                 parent.value = ctrl;
         }
-        else if (Node.isDocument(parent)) {
+        else if (isDocument(parent)) {
             parent.contents = ctrl;
         }
         else {
-            const pt = Node.isAlias(parent) ? 'alias' : 'scalar';
+            const pt = isAlias(parent) ? 'alias' : 'scalar';
             throw new Error(`Cannot replace node with ${pt} parent`);
         }
         return _visit(key, ctrl, visitor, path);
     }
     if (typeof ctrl !== 'symbol') {
-        if (Node.isCollection(node)) {
+        if (isCollection(node)) {
             path = Object.freeze(path.concat(node));
             for (let i = 0; i < node.items.length; ++i) {
                 const ci = _visit(i, node.items[i], visitor, path);
@@ -128,7 +126,7 @@ function _visit(key, node, visitor, path) {
                 }
             }
         }
-        else if (Node.isPair(node)) {
+        else if (isPair(node)) {
             path = Object.freeze(path.concat(node));
             const ck = _visit('key', node.key, visitor, path);
             if (ck === BREAK)
@@ -145,4 +143,4 @@ function _visit(key, node, visitor, path) {
     return ctrl;
 }
 
-exports.visit = visit;
+export { visit };

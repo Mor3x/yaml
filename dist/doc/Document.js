@@ -1,21 +1,19 @@
-'use strict';
-
-var Alias = require('../nodes/Alias.js');
-var Collection = require('../nodes/Collection.js');
-var Node = require('../nodes/Node.js');
-var Pair = require('../nodes/Pair.js');
-var toJS = require('../nodes/toJS.js');
-var options = require('../options.js');
-var Schema = require('../schema/Schema.js');
-var stringify = require('../stringify/stringify.js');
-var stringifyDocument = require('../stringify/stringifyDocument.js');
-var anchors = require('./anchors.js');
-var applyReviver = require('./applyReviver.js');
-var createNode = require('./createNode.js');
-var directives = require('./directives.js');
+import { Alias } from '../nodes/Alias.js';
+import { isEmptyPath, collectionFromPath } from '../nodes/Collection.js';
+import { NODE_TYPE, DOC, isCollection, isScalar } from '../nodes/Node.js';
+import { Pair } from '../nodes/Pair.js';
+import { toJS } from '../nodes/toJS.js';
+import { defaultOptions } from '../options.js';
+import { Schema } from '../schema/Schema.js';
+import { stringify } from '../stringify/stringify.js';
+import { stringifyDocument } from '../stringify/stringifyDocument.js';
+import { anchorNames, findNewAnchor, createNodeAnchors } from './anchors.js';
+import { applyReviver } from './applyReviver.js';
+import { createNode } from './createNode.js';
+import { Directives } from './directives.js';
 
 class Document {
-    constructor(value, replacer, options$1) {
+    constructor(value, replacer, options) {
         /** A comment before this Document */
         this.commentBefore = null;
         /** A comment immediately after this Document */
@@ -24,30 +22,30 @@ class Document {
         this.errors = [];
         /** Warnings encountered during parsing. */
         this.warnings = [];
-        Object.defineProperty(this, Node.NODE_TYPE, { value: Node.DOC });
+        Object.defineProperty(this, NODE_TYPE, { value: DOC });
         let _replacer = null;
         if (typeof replacer === 'function' || Array.isArray(replacer)) {
             _replacer = replacer;
         }
-        else if (options$1 === undefined && replacer) {
-            options$1 = replacer;
+        else if (options === undefined && replacer) {
+            options = replacer;
             replacer = undefined;
         }
-        const opt = Object.assign({}, options.defaultOptions, options$1);
+        const opt = Object.assign({}, defaultOptions, options);
         this.options = opt;
         let { version } = opt;
-        if (options$1 === null || options$1 === void 0 ? void 0 : options$1.directives) {
-            this.directives = options$1.directives.atDocument();
+        if (options === null || options === void 0 ? void 0 : options.directives) {
+            this.directives = options.directives.atDocument();
             if (this.directives.yaml.explicit)
                 version = this.directives.yaml.version;
         }
         else
-            this.directives = new directives.Directives({ version });
-        this.setSchema(version, options$1);
+            this.directives = new Directives({ version });
+        this.setSchema(version, options);
         if (value === undefined)
             this.contents = null;
         else {
-            this.contents = this.createNode(value, _replacer, options$1);
+            this.contents = this.createNode(value, _replacer, options);
         }
     }
     /** Adds a value to the document. */
@@ -71,11 +69,11 @@ class Document {
      */
     createAlias(node, name) {
         if (!node.anchor) {
-            const prev = anchors.anchorNames(this);
+            const prev = anchorNames(this);
             node.anchor =
-                !name || prev.has(name) ? anchors.findNewAnchor(name || 'a', prev) : name;
+                !name || prev.has(name) ? findNewAnchor(name || 'a', prev) : name;
         }
-        return new Alias.Alias(node.anchor);
+        return new Alias(node.anchor);
     }
     createNode(value, replacer, options) {
         let _replacer = undefined;
@@ -95,7 +93,7 @@ class Document {
             replacer = undefined;
         }
         const { anchorPrefix, flow, keepUndefined, onTagObj, tag } = options || {};
-        const { onAnchor, setAnchors, sourceObjects } = anchors.createNodeAnchors(this, anchorPrefix || 'a');
+        const { onAnchor, setAnchors, sourceObjects } = createNodeAnchors(this, anchorPrefix || 'a');
         const ctx = {
             keepUndefined: keepUndefined !== null && keepUndefined !== void 0 ? keepUndefined : false,
             onAnchor,
@@ -104,8 +102,8 @@ class Document {
             schema: this.schema,
             sourceObjects
         };
-        const node = createNode.createNode(value, tag, ctx);
-        if (flow && Node.isCollection(node))
+        const node = createNode(value, tag, ctx);
+        if (flow && isCollection(node))
             node.flow = true;
         setAnchors();
         return node;
@@ -117,7 +115,7 @@ class Document {
     createPair(key, value, options = {}) {
         const k = this.createNode(key, null, options);
         const v = this.createNode(value, null, options);
-        return new Pair.Pair(k, v);
+        return new Pair(k, v);
     }
     /**
      * Removes a value from the document.
@@ -131,7 +129,7 @@ class Document {
      * @returns `true` if the item was found and removed.
      */
     deleteIn(path) {
-        if (Collection.isEmptyPath(path)) {
+        if (isEmptyPath(path)) {
             if (this.contents == null)
                 return false;
             this.contents = null;
@@ -147,7 +145,7 @@ class Document {
      * `true` (collections are always returned intact).
      */
     get(key, keepScalar) {
-        return Node.isCollection(this.contents)
+        return isCollection(this.contents)
             ? this.contents.get(key, keepScalar)
             : undefined;
     }
@@ -157,11 +155,11 @@ class Document {
      * `true` (collections are always returned intact).
      */
     getIn(path, keepScalar) {
-        if (Collection.isEmptyPath(path))
-            return !keepScalar && Node.isScalar(this.contents)
+        if (isEmptyPath(path))
+            return !keepScalar && isScalar(this.contents)
                 ? this.contents.value
                 : this.contents;
-        return Node.isCollection(this.contents)
+        return isCollection(this.contents)
             ? this.contents.getIn(path, keepScalar)
             : undefined;
     }
@@ -169,15 +167,15 @@ class Document {
      * Checks if the document includes a value with the key `key`.
      */
     has(key) {
-        return Node.isCollection(this.contents) ? this.contents.has(key) : false;
+        return isCollection(this.contents) ? this.contents.has(key) : false;
     }
     /**
      * Checks if the document includes a value at `path`.
      */
     hasIn(path) {
-        if (Collection.isEmptyPath(path))
+        if (isEmptyPath(path))
             return this.contents !== undefined;
-        return Node.isCollection(this.contents) ? this.contents.hasIn(path) : false;
+        return isCollection(this.contents) ? this.contents.hasIn(path) : false;
     }
     /**
      * Sets a value in this document. For `!!set`, `value` needs to be a
@@ -185,7 +183,7 @@ class Document {
      */
     set(key, value) {
         if (this.contents == null) {
-            this.contents = Collection.collectionFromPath(this.schema, [key], value);
+            this.contents = collectionFromPath(this.schema, [key], value);
         }
         else if (assertCollection(this.contents)) {
             this.contents.set(key, value);
@@ -196,10 +194,10 @@ class Document {
      * boolean to add/remove the item from the set.
      */
     setIn(path, value) {
-        if (Collection.isEmptyPath(path))
+        if (isEmptyPath(path))
             this.contents = value;
         else if (this.contents == null) {
-            this.contents = Collection.collectionFromPath(this.schema, Array.from(path), value);
+            this.contents = collectionFromPath(this.schema, Array.from(path), value);
         }
         else if (assertCollection(this.contents)) {
             this.contents.setIn(path, value);
@@ -226,7 +224,7 @@ class Document {
                 throw new Error(`Expected '1.1' or '1.2' as version, but found: ${sv}`);
             }
         }
-        this.schema = new Schema.Schema(_options);
+        this.schema = new Schema(_options);
     }
     // json & jsonArg are only used from toJSON()
     toJS({ json, jsonArg, mapAsMap, maxAliasCount, onAnchor, reviver } = {}) {
@@ -237,14 +235,14 @@ class Document {
             mapAsMap: mapAsMap === true,
             mapKeyWarned: false,
             maxAliasCount: typeof maxAliasCount === 'number' ? maxAliasCount : 100,
-            stringify: stringify.stringify
+            stringify
         };
-        const res = toJS.toJS(this.contents, jsonArg || '', ctx);
+        const res = toJS(this.contents, jsonArg || '', ctx);
         if (typeof onAnchor === 'function')
             for (const { count, res } of ctx.anchors.values())
                 onAnchor(res, count);
         return typeof reviver === 'function'
-            ? applyReviver.applyReviver(reviver, { '': res }, '', res)
+            ? applyReviver(reviver, { '': res }, '', res)
             : res;
     }
     /**
@@ -265,13 +263,13 @@ class Document {
             const s = JSON.stringify(options.indent);
             throw new Error(`"indent" option must be a positive integer, not ${s}`);
         }
-        return stringifyDocument.stringifyDocument(this, options);
+        return stringifyDocument(this, options);
     }
 }
 function assertCollection(contents) {
-    if (Node.isCollection(contents))
+    if (isCollection(contents))
         return true;
     throw new Error('Expected a YAML collection as document contents');
 }
 
-exports.Document = Document;
+export { Document };

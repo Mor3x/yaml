@@ -1,25 +1,23 @@
-'use strict';
-
-var map = require('../common/map.js');
-var _null = require('../common/null.js');
-var seq = require('../common/seq.js');
-var string = require('../common/string.js');
-var bool = require('./bool.js');
-var float = require('./float.js');
-var int = require('./int.js');
+import { map } from '../common/map.js';
+import { nullTag } from '../common/null.js';
+import { seq } from '../common/seq.js';
+import { string } from '../common/string.js';
+import { boolTag } from './bool.js';
+import { floatNaN, floatExp, float } from './float.js';
+import { intOct, int, intHex } from './int.js';
 
 const schema = [
-    map.map,
-    seq.seq,
-    string.string,
-    _null.nullTag,
-    bool.boolTag,
-    int.intOct,
-    int.int,
-    int.intHex,
-    float.floatNaN,
-    float.floatExp,
-    float.float
+    map,
+    seq,
+    string,
+    nullTag,
+    boolTag,
+    intOct,
+    int,
+    intHex,
+    floatNaN,
+    floatExp,
+    float
 ];
 
-exports.schema = schema;
+export { schema };

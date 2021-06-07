@@ -1,5 +1,3 @@
-'use strict';
-
 const BREAK = Symbol('break visit');
 const SKIP = Symbol('skip children');
 const REMOVE = Symbol('remove item');
@@ -96,4 +94,4 @@ function _visit(path, item, visitor) {
     return typeof ctrl === 'function' ? ctrl(item, path) : ctrl;
 }
 
-exports.visit = visit;
+export { visit };

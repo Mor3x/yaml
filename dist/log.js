@@ -1,5 +1,3 @@
-'use strict';
-
 function debug(logLevel, ...messages) {
     if (logLevel === 'debug')
         console.log(...messages);
@@ -13,5 +11,4 @@ function warn(logLevel, warning) {
     }
 }
 
-exports.debug = debug;
-exports.warn = warn;
+export { debug, warn };

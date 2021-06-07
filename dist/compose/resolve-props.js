@@ -1,5 +1,3 @@
-'use strict';
-
 function resolveProps(tokens, { ctx, flow, indicator, offset, onError, startOnNewline }) {
     let spaceBefore = false;
     let atNewline = startOnNewline;
@@ -108,4 +106,4 @@ function resolveProps(tokens, { ctx, flow, indicator, offset, onError, startOnNe
     };
 }
 
-exports.resolveProps = resolveProps;
+export { resolveProps };

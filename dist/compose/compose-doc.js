@@ -1,19 +1,17 @@
-'use strict';
-
-var Document = require('../doc/Document.js');
-var composeNode = require('./compose-node.js');
-var resolveEnd = require('./resolve-end.js');
-var resolveProps = require('./resolve-props.js');
+import { Document } from '../doc/Document.js';
+import { composeNode, composeEmptyNode } from './compose-node.js';
+import { resolveEnd } from './resolve-end.js';
+import { resolveProps } from './resolve-props.js';
 
 function composeDoc(options, directives, { offset, start, value, end }, onError) {
     const opts = Object.assign({ directives }, options);
-    const doc = new Document.Document(undefined, opts);
+    const doc = new Document(undefined, opts);
     const ctx = {
         directives: doc.directives,
         options: doc.options,
         schema: doc.schema
     };
-    const props = resolveProps.resolveProps(start, {
+    const props = resolveProps(start, {
         ctx,
         indicator: 'doc-start',
         offset,
@@ -28,14 +26,14 @@ function composeDoc(options, directives, { offset, start, value, end }, onError)
             onError(props.end, 'MISSING_CHAR', 'Block collection cannot start on same line with directives-end marker');
     }
     doc.contents = value
-        ? composeNode.composeNode(ctx, value, props, onError)
-        : composeNode.composeEmptyNode(ctx, props.end, start, null, props, onError);
+        ? composeNode(ctx, value, props, onError)
+        : composeEmptyNode(ctx, props.end, start, null, props, onError);
     const contentEnd = doc.contents.range[2];
-    const re = resolveEnd.resolveEnd(end, contentEnd, false, onError);
+    const re = resolveEnd(end, contentEnd, false, onError);
     if (re.comment)
         doc.comment = re.comment;
     doc.range = [offset, contentEnd, re.offset];
     return doc;
 }
 
-exports.composeDoc = composeDoc;
+export { composeDoc };

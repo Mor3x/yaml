@@ -1,5 +1,3 @@
-'use strict';
-
 function resolveEnd(end, offset, reqSpace, onError) {
     let comment = '';
     if (end) {
@@ -36,4 +34,4 @@ function resolveEnd(end, offset, reqSpace, onError) {
     return { comment, offset };
 }
 
-exports.resolveEnd = resolveEnd;
+export { resolveEnd };

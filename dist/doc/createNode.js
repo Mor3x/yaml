@@ -1,8 +1,6 @@
-'use strict';
-
-var Alias = require('../nodes/Alias.js');
-var Node = require('../nodes/Node.js');
-var Scalar = require('../nodes/Scalar.js');
+import { Alias } from '../nodes/Alias.js';
+import { isNode, isPair, MAP, SEQ } from '../nodes/Node.js';
+import { Scalar } from '../nodes/Scalar.js';
 
 const defaultTagPrefix = 'tag:yaml.org,2002:';
 function findTagObject(value, tagName, tags) {
@@ -17,10 +15,10 @@ function findTagObject(value, tagName, tags) {
 }
 function createNode(value, tagName, ctx) {
     var _a, _b;
-    if (Node.isNode(value))
+    if (isNode(value))
         return value;
-    if (Node.isPair(value)) {
-        const map = (_b = (_a = ctx.schema[Node.MAP]).createNode) === null || _b === void 0 ? void 0 : _b.call(_a, ctx.schema, null, ctx);
+    if (isPair(value)) {
+        const map = (_b = (_a = ctx.schema[MAP]).createNode) === null || _b === void 0 ? void 0 : _b.call(_a, ctx.schema, null, ctx);
         map.items.push(value);
         return map;
     }
@@ -41,7 +39,7 @@ function createNode(value, tagName, ctx) {
         if (ref) {
             if (!ref.anchor)
                 ref.anchor = onAnchor(value);
-            return new Alias.Alias(ref.anchor);
+            return new Alias(ref.anchor);
         }
         else {
             ref = { anchor: null, node: null };
@@ -55,13 +53,13 @@ function createNode(value, tagName, ctx) {
         if (value && typeof value.toJSON === 'function')
             value = value.toJSON();
         if (!value || typeof value !== 'object')
-            return new Scalar.Scalar(value);
+            return new Scalar(value);
         tagObj =
             value instanceof Map
-                ? schema[Node.MAP]
+                ? schema[MAP]
                 : Symbol.iterator in Object(value)
-                    ? schema[Node.SEQ]
-                    : schema[Node.MAP];
+                    ? schema[SEQ]
+                    : schema[MAP];
     }
     if (onTagObj) {
         onTagObj(tagObj);
@@ -69,7 +67,7 @@ function createNode(value, tagName, ctx) {
     }
     const node = (tagObj === null || tagObj === void 0 ? void 0 : tagObj.createNode)
         ? tagObj.createNode(ctx.schema, value, ctx)
-        : new Scalar.Scalar(value);
+        : new Scalar(value);
     if (tagName)
         node.tag = tagName;
     if (ref)
@@ -77,4 +75,4 @@ function createNode(value, tagName, ctx) {
     return node;
 }
 
-exports.createNode = createNode;
+export { createNode };

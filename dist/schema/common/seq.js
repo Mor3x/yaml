@@ -1,12 +1,10 @@
-'use strict';
-
-var createNode = require('../../doc/createNode.js');
-var Node = require('../../nodes/Node.js');
-var YAMLSeq = require('../../nodes/YAMLSeq.js');
+import { createNode } from '../../doc/createNode.js';
+import { isSeq } from '../../nodes/Node.js';
+import { YAMLSeq } from '../../nodes/YAMLSeq.js';
 
 function createSeq(schema, obj, ctx) {
     const { replacer } = ctx;
-    const seq = new YAMLSeq.YAMLSeq(schema);
+    const seq = new YAMLSeq(schema);
     if (obj && Symbol.iterator in Object(obj)) {
         let i = 0;
         for (let it of obj) {
@@ -14,7 +12,7 @@ function createSeq(schema, obj, ctx) {
                 const key = obj instanceof Set ? it : String(i++);
                 it = replacer.call(obj, key, it);
             }
-            seq.items.push(createNode.createNode(it, undefined, ctx));
+            seq.items.push(createNode(it, undefined, ctx));
         }
     }
     return seq;
@@ -23,13 +21,13 @@ const seq = {
     collection: 'seq',
     createNode: createSeq,
     default: true,
-    nodeClass: YAMLSeq.YAMLSeq,
+    nodeClass: YAMLSeq,
     tag: 'tag:yaml.org,2002:seq',
     resolve(seq, onError) {
-        if (!Node.isSeq(seq))
+        if (!isSeq(seq))
             onError('Expected a sequence for this tag');
         return seq;
     }
 };
 
-exports.seq = seq;
+export { seq };

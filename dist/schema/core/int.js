@@ -1,6 +1,4 @@
-'use strict';
-
-var stringifyNumber = require('../../stringify/stringifyNumber.js');
+import { stringifyNumber } from '../../stringify/stringifyNumber.js';
 
 const intIdentify = (value) => typeof value === 'bigint' || Number.isInteger(value);
 const intResolve = (str, offset, radix, { intAsBigInt }) => (intAsBigInt ? BigInt(str) : parseInt(str.substring(offset), radix));
@@ -8,7 +6,7 @@ function intStringify(node, radix, prefix) {
     const { value } = node;
     if (intIdentify(value) && value >= 0)
         return prefix + value.toString(radix);
-    return stringifyNumber.stringifyNumber(node);
+    return stringifyNumber(node);
 }
 const intOct = {
     identify: value => intIdentify(value) && value >= 0,
@@ -25,7 +23,7 @@ const int = {
     tag: 'tag:yaml.org,2002:int',
     test: /^[-+]?[0-9]+$/,
     resolve: (str, _onError, opt) => intResolve(str, 0, 10, opt),
-    stringify: stringifyNumber.stringifyNumber
+    stringify: stringifyNumber
 };
 const intHex = {
     identify: value => intIdentify(value) && value >= 0,
@@ -37,6 +35,4 @@ const intHex = {
     stringify: node => intStringify(node, 16, '0x')
 };
 
-exports.int = int;
-exports.intHex = intHex;
-exports.intOct = intOct;
+export { int, intHex, intOct };

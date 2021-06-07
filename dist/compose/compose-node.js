@@ -1,10 +1,8 @@
-'use strict';
-
-var Alias = require('../nodes/Alias.js');
-var composeCollection = require('./compose-collection.js');
-var composeScalar = require('./compose-scalar.js');
-var resolveEnd = require('./resolve-end.js');
-var utilEmptyScalarPosition = require('./util-empty-scalar-position.js');
+import { Alias } from '../nodes/Alias.js';
+import { composeCollection } from './compose-collection.js';
+import { composeScalar } from './compose-scalar.js';
+import { resolveEnd } from './resolve-end.js';
+import { emptyScalarPosition } from './util-empty-scalar-position.js';
 
 const CN = { composeNode, composeEmptyNode };
 function composeNode(ctx, token, props, onError) {
@@ -20,14 +18,14 @@ function composeNode(ctx, token, props, onError) {
         case 'single-quoted-scalar':
         case 'double-quoted-scalar':
         case 'block-scalar':
-            node = composeScalar.composeScalar(ctx, token, tag, onError);
+            node = composeScalar(ctx, token, tag, onError);
             if (anchor)
                 node.anchor = anchor.source.substring(1);
             break;
         case 'block-map':
         case 'block-seq':
         case 'flow-collection':
-            node = composeCollection.composeCollection(CN, ctx, token, tag, onError);
+            node = composeCollection(CN, ctx, token, tag, onError);
             if (anchor)
                 node.anchor = anchor.source.substring(1);
             break;
@@ -48,11 +46,11 @@ function composeNode(ctx, token, props, onError) {
 function composeEmptyNode(ctx, offset, before, pos, { spaceBefore, comment, anchor, tag }, onError) {
     const token = {
         type: 'scalar',
-        offset: utilEmptyScalarPosition.emptyScalarPosition(offset, before, pos),
+        offset: emptyScalarPosition(offset, before, pos),
         indent: -1,
         source: ''
     };
-    const node = composeScalar.composeScalar(ctx, token, tag, onError);
+    const node = composeScalar(ctx, token, tag, onError);
     if (anchor)
         node.anchor = anchor.source.substring(1);
     if (spaceBefore)
@@ -62,14 +60,13 @@ function composeEmptyNode(ctx, offset, before, pos, { spaceBefore, comment, anch
     return node;
 }
 function composeAlias({ options }, { offset, source, end }, onError) {
-    const alias = new Alias.Alias(source.substring(1));
+    const alias = new Alias(source.substring(1));
     const valueEnd = offset + source.length;
-    const re = resolveEnd.resolveEnd(end, valueEnd, options.strict, onError);
+    const re = resolveEnd(end, valueEnd, options.strict, onError);
     alias.range = [offset, valueEnd, re.offset];
     if (re.comment)
         alias.comment = re.comment;
     return alias;
 }
 
-exports.composeEmptyNode = composeEmptyNode;
-exports.composeNode = composeNode;
+export { composeEmptyNode, composeNode };

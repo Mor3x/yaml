@@ -1,33 +1,31 @@
-'use strict';
+import { isMap, isPair, isScalar } from '../../nodes/Node.js';
+import { createPair, Pair } from '../../nodes/Pair.js';
+import { YAMLMap, findPair } from '../../nodes/YAMLMap.js';
 
-var Node = require('../../nodes/Node.js');
-var Pair = require('../../nodes/Pair.js');
-var YAMLMap = require('../../nodes/YAMLMap.js');
-
-class YAMLSet extends YAMLMap.YAMLMap {
+class YAMLSet extends YAMLMap {
     constructor(schema) {
         super(schema);
         this.tag = YAMLSet.tag;
     }
     add(key) {
         let pair;
-        if (Node.isPair(key))
+        if (isPair(key))
             pair = key;
         else if (typeof key === 'object' &&
             'key' in key &&
             'value' in key &&
             key.value === null)
-            pair = new Pair.Pair(key.key, null);
+            pair = new Pair(key.key, null);
         else
-            pair = new Pair.Pair(key, null);
-        const prev = YAMLMap.findPair(this.items, pair.key);
+            pair = new Pair(key, null);
+        const prev = findPair(this.items, pair.key);
         if (!prev)
             this.items.push(pair);
     }
     get(key, keepPair) {
-        const pair = YAMLMap.findPair(this.items, key);
-        return !keepPair && Node.isPair(pair)
-            ? Node.isScalar(pair.key)
+        const pair = findPair(this.items, key);
+        return !keepPair && isPair(pair)
+            ? isScalar(pair.key)
                 ? pair.key.value
                 : pair.key
             : pair;
@@ -35,12 +33,12 @@ class YAMLSet extends YAMLMap.YAMLMap {
     set(key, value) {
         if (typeof value !== 'boolean')
             throw new Error(`Expected boolean value for set(key, value) in a YAML set, not ${typeof value}`);
-        const prev = YAMLMap.findPair(this.items, key);
+        const prev = findPair(this.items, key);
         if (prev && !value) {
             this.items.splice(this.items.indexOf(prev), 1);
         }
         else if (!prev && value) {
-            this.items.push(new Pair.Pair(key));
+            this.items.push(new Pair(key));
         }
     }
     toJSON(_, ctx) {
@@ -63,7 +61,7 @@ const set = {
     default: false,
     tag: 'tag:yaml.org,2002:set',
     resolve(map, onError) {
-        if (Node.isMap(map)) {
+        if (isMap(map)) {
             if (map.hasAllNullValues(true))
                 return Object.assign(new YAMLSet(), map);
             else
@@ -80,11 +78,10 @@ const set = {
             for (let value of iterable) {
                 if (typeof replacer === 'function')
                     value = replacer.call(iterable, value, value);
-                set.items.push(Pair.createPair(value, null, ctx));
+                set.items.push(createPair(value, null, ctx));
             }
         return set;
     }
 };
 
-exports.YAMLSet = YAMLSet;
-exports.set = set;
+export { YAMLSet, set };

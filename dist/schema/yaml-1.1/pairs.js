@@ -1,20 +1,18 @@
-'use strict';
-
-var Node = require('../../nodes/Node.js');
-var Pair = require('../../nodes/Pair.js');
-var Scalar = require('../../nodes/Scalar.js');
-var YAMLSeq = require('../../nodes/YAMLSeq.js');
+import { isSeq, isPair, isMap } from '../../nodes/Node.js';
+import { Pair, createPair } from '../../nodes/Pair.js';
+import { Scalar } from '../../nodes/Scalar.js';
+import { YAMLSeq } from '../../nodes/YAMLSeq.js';
 
 function resolvePairs(seq, onError) {
-    if (Node.isSeq(seq)) {
+    if (isSeq(seq)) {
         for (let i = 0; i < seq.items.length; ++i) {
             let item = seq.items[i];
-            if (Node.isPair(item))
+            if (isPair(item))
                 continue;
-            else if (Node.isMap(item)) {
+            else if (isMap(item)) {
                 if (item.items.length > 1)
                     onError('Each pair must have its own sequence indicator');
-                const pair = item.items[0] || new Pair.Pair(new Scalar.Scalar(null));
+                const pair = item.items[0] || new Pair(new Scalar(null));
                 if (item.commentBefore)
                     pair.key.commentBefore = pair.key.commentBefore
                         ? `${item.commentBefore}\n${pair.key.commentBefore}`
@@ -27,7 +25,7 @@ function resolvePairs(seq, onError) {
                 }
                 item = pair;
             }
-            seq.items[i] = Node.isPair(item) ? item : new Pair.Pair(item);
+            seq.items[i] = isPair(item) ? item : new Pair(item);
         }
     }
     else
@@ -36,7 +34,7 @@ function resolvePairs(seq, onError) {
 }
 function createPairs(schema, iterable, ctx) {
     const { replacer } = ctx;
-    const pairs = new YAMLSeq.YAMLSeq(schema);
+    const pairs = new YAMLSeq(schema);
     pairs.tag = 'tag:yaml.org,2002:pairs';
     let i = 0;
     if (iterable && Symbol.iterator in Object(iterable))
@@ -64,7 +62,7 @@ function createPairs(schema, iterable, ctx) {
             else {
                 key = it;
             }
-            pairs.items.push(Pair.createPair(key, value, ctx));
+            pairs.items.push(createPair(key, value, ctx));
         }
     return pairs;
 }
@@ -76,6 +74,4 @@ const pairs = {
     createNode: createPairs
 };
 
-exports.createPairs = createPairs;
-exports.pairs = pairs;
-exports.resolvePairs = resolvePairs;
+export { createPairs, pairs, resolvePairs };

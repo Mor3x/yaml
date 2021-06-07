@@ -1,7 +1,5 @@
-'use strict';
-
-var Scalar = require('../../nodes/Scalar.js');
-var stringifyString = require('../../stringify/stringifyString.js');
+import { Scalar } from '../../nodes/Scalar.js';
+import { stringifyString } from '../../stringify/stringifyString.js';
 
 const binary = {
     identify: value => value instanceof Uint8Array,
@@ -51,18 +49,18 @@ const binary = {
             throw new Error('This environment does not support writing binary tags; either Buffer or btoa is required');
         }
         if (!type)
-            type = Scalar.Scalar.BLOCK_LITERAL;
-        if (type !== Scalar.Scalar.QUOTE_DOUBLE) {
+            type = Scalar.BLOCK_LITERAL;
+        if (type !== Scalar.QUOTE_DOUBLE) {
             const lineWidth = Math.max(ctx.options.lineWidth - ctx.indent.length, ctx.options.minContentWidth);
             const n = Math.ceil(str.length / lineWidth);
             const lines = new Array(n);
             for (let i = 0, o = 0; i < n; ++i, o += lineWidth) {
                 lines[i] = str.substr(o, lineWidth);
             }
-            str = lines.join(type === Scalar.Scalar.BLOCK_LITERAL ? '\n' : ' ');
+            str = lines.join(type === Scalar.BLOCK_LITERAL ? '\n' : ' ');
         }
-        return stringifyString.stringifyString({ comment, type, value: str }, ctx, onComment, onChompKeep);
+        return stringifyString({ comment, type, value: str }, ctx, onComment, onChompKeep);
     }
 };
 
-exports.binary = binary;
+export { binary };

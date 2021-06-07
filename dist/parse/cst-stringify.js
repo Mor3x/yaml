@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Stringify a CST document, token, or collection item
  *
@@ -60,4 +58,4 @@ function stringifyItem({ start, key, sep, value }) {
     return res;
 }
 
-exports.stringify = stringify;
+export { stringify };

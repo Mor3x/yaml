@@ -1,8 +1,6 @@
-'use strict';
-
-var Scalar = require('../../nodes/Scalar.js');
-var map = require('../common/map.js');
-var seq = require('../common/seq.js');
+import { Scalar } from '../../nodes/Scalar.js';
+import { map } from '../common/map.js';
+import { seq } from '../common/seq.js';
 
 function intIdentify(value) {
     return typeof value === 'bigint' || Number.isInteger(value);
@@ -18,7 +16,7 @@ const jsonScalars = [
     },
     {
         identify: value => value == null,
-        createNode: () => new Scalar.Scalar(null),
+        createNode: () => new Scalar(null),
         default: true,
         tag: 'tag:yaml.org,2002:null',
         test: /^null$/,
@@ -59,6 +57,6 @@ const jsonError = {
         return str;
     }
 };
-const schema = [map.map, seq.seq].concat(jsonScalars, jsonError);
+const schema = [map, seq].concat(jsonScalars, jsonError);
 
-exports.schema = schema;
+export { schema };

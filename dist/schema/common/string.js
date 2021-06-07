@@ -1,6 +1,4 @@
-'use strict';
-
-var stringifyString = require('../../stringify/stringifyString.js');
+import { stringifyString } from '../../stringify/stringifyString.js';
 
 const string = {
     identify: value => typeof value === 'string',
@@ -9,8 +7,8 @@ const string = {
     resolve: str => str,
     stringify(item, ctx, onComment, onChompKeep) {
         ctx = Object.assign({ actualString: true }, ctx);
-        return stringifyString.stringifyString(item, ctx, onComment, onChompKeep);
+        return stringifyString(item, ctx, onComment, onChompKeep);
     }
 };
 
-exports.string = string;
+export { string };

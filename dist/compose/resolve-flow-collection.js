@@ -1,13 +1,11 @@
-'use strict';
-
-var Node = require('../nodes/Node.js');
-var Pair = require('../nodes/Pair.js');
-var YAMLMap = require('../nodes/YAMLMap.js');
-var YAMLSeq = require('../nodes/YAMLSeq.js');
-var resolveEnd = require('./resolve-end.js');
-var resolveProps = require('./resolve-props.js');
-var utilContainsNewline = require('./util-contains-newline.js');
-var utilMapIncludes = require('./util-map-includes.js');
+import { isPair } from '../nodes/Node.js';
+import { Pair } from '../nodes/Pair.js';
+import { YAMLMap } from '../nodes/YAMLMap.js';
+import { YAMLSeq } from '../nodes/YAMLSeq.js';
+import { resolveEnd } from './resolve-end.js';
+import { resolveProps } from './resolve-props.js';
+import { containsNewline } from './util-contains-newline.js';
+import { mapIncludes } from './util-map-includes.js';
 
 const blockMsg = 'Block collections are not allowed within flow collections';
 const isBlock = (token) => token && (token.type === 'block-map' || token.type === 'block-seq');
@@ -15,13 +13,13 @@ function resolveFlowCollection({ composeNode, composeEmptyNode }, ctx, fc, onErr
     const isMap = fc.start.source === '{';
     const fcName = isMap ? 'flow map' : 'flow sequence';
     const coll = isMap
-        ? new YAMLMap.YAMLMap(ctx.schema)
-        : new YAMLSeq.YAMLSeq(ctx.schema);
+        ? new YAMLMap(ctx.schema)
+        : new YAMLSeq(ctx.schema);
     coll.flow = true;
     let offset = fc.offset;
     for (let i = 0; i < fc.items.length; ++i) {
         const { start, key, sep, value } = fc.items[i];
-        const props = resolveProps.resolveProps(start, {
+        const props = resolveProps(start, {
             ctx,
             flow: fcName,
             indicator: 'explicit-key-ind',
@@ -43,7 +41,7 @@ function resolveFlowCollection({ composeNode, composeEmptyNode }, ctx, fc, onErr
                 }
                 continue;
             }
-            if (!isMap && ctx.options.strict && utilContainsNewline.containsNewline(key))
+            if (!isMap && ctx.options.strict && containsNewline(key))
                 onError(key, // checked by containsNewline()
                 'MULTILINE_IMPLICIT_KEY', 'Implicit keys of flow sequence pairs need to be on a single line');
         }
@@ -70,7 +68,7 @@ function resolveFlowCollection({ composeNode, composeEmptyNode }, ctx, fc, onErr
                 }
                 if (prevItemComment) {
                     let prev = coll.items[coll.items.length - 1];
-                    if (Node.isPair(prev))
+                    if (isPair(prev))
                         prev = prev.value || prev.key;
                     if (prev.comment)
                         prev.comment += '\n' + prevItemComment;
@@ -101,7 +99,7 @@ function resolveFlowCollection({ composeNode, composeEmptyNode }, ctx, fc, onErr
             if (isBlock(key))
                 onError(keyNode.range, 'BLOCK_IN_FLOW', blockMsg);
             // value properties
-            const valueProps = resolveProps.resolveProps(sep || [], {
+            const valueProps = resolveProps(sep || [], {
                 ctx,
                 flow: fcName,
                 indicator: 'map-value-ind',
@@ -146,15 +144,15 @@ function resolveFlowCollection({ composeNode, composeEmptyNode }, ctx, fc, onErr
                 else
                     keyNode.comment = valueProps.comment;
             }
-            const pair = new Pair.Pair(keyNode, valueNode);
+            const pair = new Pair(keyNode, valueNode);
             if (isMap) {
                 const map = coll;
-                if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
+                if (mapIncludes(ctx, map.items, keyNode))
                     onError(keyStart, 'DUPLICATE_KEY', 'Map keys must be unique');
                 map.items.push(pair);
             }
             else {
-                const map = new YAMLMap.YAMLMap(ctx.schema);
+                const map = new YAMLMap(ctx.schema);
                 map.flow = true;
                 map.items.push(pair);
                 coll.items.push(map);
@@ -173,7 +171,7 @@ function resolveFlowCollection({ composeNode, composeEmptyNode }, ctx, fc, onErr
             ee.unshift(ce);
     }
     if (ee.length > 0) {
-        const end = resolveEnd.resolveEnd(ee, cePos, ctx.options.strict, onError);
+        const end = resolveEnd(ee, cePos, ctx.options.strict, onError);
         if (end.comment) {
             if (coll.comment)
                 coll.comment += '\n' + end.comment;
@@ -188,4 +186,4 @@ function resolveFlowCollection({ composeNode, composeEmptyNode }, ctx, fc, onErr
     return coll;
 }
 
-exports.resolveFlowCollection = resolveFlowCollection;
+export { resolveFlowCollection };
