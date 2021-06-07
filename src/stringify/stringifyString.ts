@@ -156,7 +156,7 @@ function blockString(
   // 1. Block can't end in whitespace unless the last line is non-empty.
   // 2. Strings consisting of only whitespace are best rendered explicitly.
   if (/\n[\t ]+$/.test(value) || /^\s*$/.test(value)) {
-    return doubleQuotedString(value, ctx)
+    return singleQuotedString(value, ctx)
   }
   const indent =
     ctx.indent ||
@@ -249,7 +249,7 @@ function plainString(
     (implicitKey && /[\n[\]{},]/.test(value)) ||
     (inFlow && /[[\]{},]/.test(value))
   ) {
-    return doubleQuotedString(value, ctx)
+    return singleQuotedString(value, ctx)
   }
   if (
     !value ||
