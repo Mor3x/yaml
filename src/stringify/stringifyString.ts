@@ -301,7 +301,7 @@ function plainString(
         tag.tag !== 'tag:yaml.org,2002:str' &&
         tag.test?.test(str)
       )
-        return doubleQuotedString(value, ctx)
+        return singleQuotedString(value, ctx)
     }
   }
   return implicitKey
